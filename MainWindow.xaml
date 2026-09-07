@@ -1,0 +1,82 @@
+<Window x:Class="FactorialApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:m="clr-namespace:FactorialApp.Models"
+        Title="Industrial Machine Vision HMI" Width="1500" Height="900" MinWidth="1200" MinHeight="720"
+        Background="#071321" Foreground="#E9F5FF" WindowStartupLocation="CenterScreen">
+    <Window.Resources>
+        <Style TargetType="Button"><Setter Property="Margin" Value="4"/><Setter Property="Padding" Value="12,7"/><Setter Property="Background" Value="#0A65A8"/><Setter Property="Foreground" Value="White"/><Setter Property="BorderBrush" Value="#24B7FF"/><Setter Property="Cursor" Value="Hand"/></Style>
+        <Style TargetType="TextBox"><Setter Property="Margin" Value="4"/><Setter Property="Padding" Value="6"/><Setter Property="Background" Value="#0A1D2B"/><Setter Property="Foreground" Value="White"/><Setter Property="BorderBrush" Value="#245473"/></Style>
+        <Style TargetType="ComboBox"><Setter Property="Margin" Value="4"/><Setter Property="Padding" Value="5"/></Style>
+        <Style TargetType="DataGrid"><Setter Property="Background" Value="#081A29"/><Setter Property="Foreground" Value="White"/><Setter Property="RowBackground" Value="#081A29"/><Setter Property="AlternatingRowBackground" Value="#0B2031"/><Setter Property="AutoGenerateColumns" Value="False"/><Setter Property="IsReadOnly" Value="True"/><Setter Property="CanUserAddRows" Value="False"/></Style>
+        <Style TargetType="GroupBox"><Setter Property="Margin" Value="6"/><Setter Property="Padding" Value="8"/><Setter Property="Foreground" Value="#24CFFF"/></Style>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions><RowDefinition Height="58"/><RowDefinition Height="*"/><RowDefinition Height="150"/><RowDefinition Height="28"/></Grid.RowDefinitions>
+        <Border Grid.Row="0" Background="#04101C" BorderBrush="#143A54" BorderThickness="0,0,0,1">
+            <Grid Margin="15,0"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center"><TextBlock Text="INDUSTRIAL MACHINE VISION HMI" FontSize="21" FontWeight="Bold"/><TextBlock Text="   |   "/><TextBlock Text="{Binding MachineState}" Foreground="#24CFFF" FontSize="18"/><TextBlock Text="  "/><TextBlock Text="{Binding StateDetail}" Foreground="#9AB3C7"/></StackPanel>
+                <StackPanel Grid.Column="1"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center">
+
+                    <TextBlock Text="{Binding UserText}"
+                               Margin="8"
+                               VerticalAlignment="Center"/>
+
+                    <Button Content="LOGIN"
+                            Click="Login_Click"/>
+
+                    <Button Content="LOGOUT"
+                            Command="{Binding LogoutCommand}"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <TabControl Grid.Row="1" Margin="8" Background="#071321" Foreground="White">
+            <TabItem Header="MONITOR">
+                <Grid Margin="8"><Grid.ColumnDefinitions><ColumnDefinition Width="320"/><ColumnDefinition Width="*"/><ColumnDefinition Width="330"/></Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <GroupBox Header="DEVICE HEALTH"><StackPanel><TextBlock Text="CAMERA"/><TextBlock Text="{Binding CameraText}" Foreground="#2EEA82"/><Separator/><TextBlock Text="PLC"/><TextBlock Text="{Binding PlcText}" Foreground="#2EEA82"/><Separator/><TextBlock Text="VISION SERVER"/><TextBlock Text="{Binding VisionText}" Foreground="#2EEA82"/></StackPanel></GroupBox>
+                        <GroupBox Header="ACTIVE RECIPE"><StackPanel><ComboBox ItemsSource="{Binding Recipes}" SelectedItem="{Binding SelectedRecipe}" DisplayMemberPath="Name"/><TextBlock Text="Product"/><TextBox Text="{Binding SelectedRecipe.ProductCode}"/><TextBlock Text="Version"/><TextBlock Text="{Binding SelectedRecipe.Version}"/><TextBlock Text="Exposure (us)"/><TextBox Text="{Binding SelectedRecipe.ExposureUs}"/><TextBlock Text="Gain"/><TextBox Text="{Binding SelectedRecipe.Gain}"/></StackPanel></GroupBox>
+                        <Button Content="RUN ONE PLC CYCLE" Command="{Binding RunCycleCommand}" Height="45"/><Button Content="AUTO START" Command="{Binding AutoStartCommand}" Height="42"/><Button Content="AUTO STOP" Command="{Binding AutoStopCommand}" Height="42" Background="#8C2633"/>
+                    </StackPanel>
+                    <Grid Grid.Column="1" Margin="8"><Grid.RowDefinitions><RowDefinition Height="180"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                        <UniformGrid Columns="4"><GroupBox Header="TOTAL"><TextBlock Text="{Binding Total}" FontSize="34" HorizontalAlignment="Center" VerticalAlignment="Center"/></GroupBox><GroupBox Header="PASS"><TextBlock Text="{Binding Pass}" FontSize="34" Foreground="#22E57B" HorizontalAlignment="Center" VerticalAlignment="Center"/></GroupBox><GroupBox Header="NG"><TextBlock Text="{Binding Ng}" FontSize="34" Foreground="#FF5964" HorizontalAlignment="Center" VerticalAlignment="Center"/></GroupBox><GroupBox Header="YIELD %"><TextBlock Text="{Binding Yield, StringFormat=F2}" FontSize="34" Foreground="#24CFFF" HorizontalAlignment="Center" VerticalAlignment="Center"/></GroupBox></UniformGrid>
+                        <GroupBox Grid.Row="1" Header="LAST INSPECTION"><StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"><TextBlock Text="{Binding LastResultText}" FontSize="54" FontWeight="Bold" Foreground="#24CFFF"/><TextBlock Text="{Binding LastInspection.SerialNumber}" FontSize="16"/><TextBlock Text="{Binding LastInspection.NgReason}" FontSize="18" Foreground="#FF7B84" TextWrapping="Wrap"/></StackPanel></GroupBox>
+                    </Grid>
+                    <StackPanel Grid.Column="2"><GroupBox Header="VISION LIMITS"><StackPanel><TextBlock Text="Threshold Mode"/><ComboBox Text="{Binding SelectedRecipe.ThresholdMode}" IsEditable="True"/><TextBlock Text="Threshold"/><TextBox Text="{Binding SelectedRecipe.Threshold}"/><TextBlock Text="Min Area"/><TextBox Text="{Binding SelectedRecipe.MinArea}"/><TextBlock Text="Max Area"/><TextBox Text="{Binding SelectedRecipe.MaxArea}"/><TextBlock Text="Position Tol"/><TextBox Text="{Binding SelectedRecipe.PositionTolerance}"/><TextBlock Text="Angle Tol"/><TextBox Text="{Binding SelectedRecipe.AngleTolerance}"/><TextBlock Text="Area Tol %"/><TextBox Text="{Binding SelectedRecipe.AreaTolerancePercent}"/></StackPanel></GroupBox></StackPanel>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="HISTORY">
+                <Grid Margin="8"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                    <WrapPanel><TextBlock Text="From" VerticalAlignment="Center"/><DatePicker SelectedDate="{Binding FilterFrom}"/><TextBlock Text="To" VerticalAlignment="Center"/><DatePicker SelectedDate="{Binding FilterTo}"/><TextBox Width="130" Text="{Binding FilterProduct}" ToolTip="Product"/><TextBox Width="130" Text="{Binding FilterRecipe}" ToolTip="Recipe"/><ComboBox Width="100" ItemsSource="{Binding ResultFilters}" SelectedItem="{Binding FilterResult}"/><TextBox Width="100" Text="{Binding FilterNgCode}" ToolTip="NG Code"/><TextBox Width="190" Text="{Binding FilterSerial}" ToolTip="Serial number"/><Button Content="SEARCH" Command="{Binding RefreshHistoryCommand}"/><Button Content="EXPORT CSV" Command="{Binding ExportCsvCommand}"/></WrapPanel>
+                    <DataGrid Grid.Row="1" ItemsSource="{Binding InspectionHistory}" AlternationCount="2"><DataGrid.Columns>
+                        <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="65"/><DataGridTextColumn Header="TIME" Binding="{Binding Timestamp, StringFormat=yyyy-MM-dd HH:mm:ss}" Width="150"/><DataGridTextColumn Header="SERIAL" Binding="{Binding SerialNumber}" Width="190"/><DataGridTextColumn Header="PRODUCT" Binding="{Binding ProductCode}" Width="110"/><DataGridTextColumn Header="RECIPE" Binding="{Binding RecipeName}" Width="110"/><DataGridTextColumn Header="VER" Binding="{Binding RecipeVersion}" Width="50"/><DataGridTextColumn Header="PASS" Binding="{Binding Passed}" Width="60"/><DataGridTextColumn Header="NG CODE" Binding="{Binding NgCode}" Width="80"/><DataGridTextColumn Header="NG REASON" Binding="{Binding NgReason}" Width="*"/><DataGridTextColumn Header="OPERATOR" Binding="{Binding Operator}" Width="100"/>
+                        <DataGridTemplateColumn Header="IMAGE" Width="90"><DataGridTemplateColumn.CellTemplate><DataTemplate><Button Content="VIEW" Command="{Binding DataContext.OpenImageCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" CommandParameter="{Binding}"/></DataTemplate></DataGridTemplateColumn.CellTemplate></DataGridTemplateColumn>
+                    </DataGrid.Columns></DataGrid>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="RECIPES" Visibility="{Binding IsEngineer, Converter={StaticResource BoolToVisibility}}">
+                <Grid Margin="12"><Grid.ColumnDefinitions><ColumnDefinition Width="300"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><ListBox ItemsSource="{Binding Recipes}" SelectedItem="{Binding SelectedRecipe}" DisplayMemberPath="Name"/><StackPanel Grid.Column="1" Width="450" HorizontalAlignment="Left"><TextBlock Text="Recipe name"/><TextBox Text="{Binding SelectedRecipe.Name}"/><TextBlock Text="Product code"/><TextBox Text="{Binding SelectedRecipe.ProductCode}"/><TextBlock Text="Current version"/><TextBlock Text="{Binding SelectedRecipe.Version}" FontSize="20"/><Button Content="NEW RECIPE" Command="{Binding NewRecipeCommand}"/><Button Content="SAVE AS NEW VERSION" Command="{Binding SaveRecipeCommand}"/></StackPanel></Grid>
+            </TabItem>
+
+            <TabItem Header="ALARMS"><Grid Margin="8"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions><Button Content="REFRESH" Command="{Binding RefreshAlarmsCommand}" HorizontalAlignment="Left"/><DataGrid Grid.Row="1" ItemsSource="{Binding AlarmHistory}"><DataGrid.Columns><DataGridTextColumn Header="TIME" Binding="{Binding Timestamp}" Width="160"/><DataGridTextColumn Header="CODE" Binding="{Binding Code}" Width="80"/><DataGridTextColumn Header="SOURCE" Binding="{Binding Source}" Width="100"/><DataGridTextColumn Header="MESSAGE" Binding="{Binding Message}" Width="*"/><DataGridCheckBoxColumn Header="ACK" Binding="{Binding IsAcknowledged}" Width="60"/><DataGridTemplateColumn Header="ACTION" Width="90"><DataGridTemplateColumn.CellTemplate><DataTemplate><Button Content="ACK" Command="{Binding DataContext.AckAlarmCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" CommandParameter="{Binding}"/></DataTemplate></DataGridTemplateColumn.CellTemplate></DataGridTemplateColumn></DataGrid.Columns></DataGrid></Grid></TabItem>
+        </TabControl>
+
+        <GroupBox Grid.Row="2" Header="SYSTEM LOG" Margin="8"><ListBox ItemsSource="{Binding Logs}" Background="#04101C" Foreground="#BFD7E8"/></GroupBox>
+        <Border Grid.Row="3" Background="#04101C"><TextBlock Text="Industrial HMI | PLC handshake + camera + vision + traceability + RBAC + watchdog" VerticalAlignment="Center" Margin="10,0" Foreground="#829CAF"/></Border>
+
+        <Border x:Name="LoginOverlay"
+                Grid.Row="0"
+                Grid.RowSpan="4"
+                Panel.ZIndex="999"
+                Background="#D904101C">
+            <Border Width="420" Padding="25" Background="#0A1D2B" BorderBrush="#24CFFF" BorderThickness="1" CornerRadius="7" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <StackPanel><TextBlock Text="HMI LOGIN" FontSize="28" FontWeight="Bold" Foreground="#24CFFF" Margin="0,0,0,15"/><TextBlock Text="Username"/><TextBox x:Name="UsernameBox" Text="operator"/><TextBlock Text="Password"/><PasswordBox x:Name="PasswordBox" Password="Operator123!" Margin="4" Padding="6"/><TextBlock x:Name="LoginError" Foreground="#FF6671"/><Button Content="LOGIN" Height="42" Click="Login_Click"/></StackPanel>
+            </Border>
+        </Border>
+    </Grid>
+</Window>

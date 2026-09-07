@@ -1,0 +1,35 @@
+# .NET
+bin/
+obj/
+artifacts/
+publish/
+
+# Rider / Visual Studio
+.idea/
+.vs/
+*.user
+*.suo
+
+# Build outputs
+*.dll
+*.exe
+*.pdb
+*.deps.json
+*.runtimeconfig.json
+
+# Runtime data
+*.db
+*.db-shm
+*.db-wal
+InspectionImages/
+Data/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# OS
+.DS_Store
+Thumbs.db
