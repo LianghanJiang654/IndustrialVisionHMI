@@ -20,7 +20,13 @@ public sealed class InspectionCycleService
             string rawPath=_history.SaveImage(frame.Bytes,recipe.ProductCode,serial,false,frame.Extension);
             Set(MachineState.Inspecting,"VISION INSPECTION"); result=await Retry(()=>_vision.InspectAsync(frame,recipe,ct),"V900","VISION SERVICE",ct);
             bool pass=result.Success&&result.InspectionPass; Set(MachineState.SendingResult,pass?"SEND PASS":"SEND NG"); await _plc.SetResultAsync(pass,ct);
-            string annotated=""; if(!pass && !string.IsNullOrWhiteSpace(result.AnnotatedImageBase64)) annotated=_history.SaveImage(Convert.FromBase64String(result.AnnotatedImageBase64),recipe.ProductCode,serial,true,".jpg");
+
+            // Save the OpenCV annotated result for BOTH PASS and NG so the HMI can show
+            // the exact inspected image and History can open the same traceability image.
+            string annotated="";
+            if(!string.IsNullOrWhiteSpace(result.AnnotatedImageBase64))
+                annotated=_history.SaveImage(Convert.FromBase64String(result.AnnotatedImageBase64),recipe.ProductCode,serial,true,".jpg");
+
             var m=result.Marks.FirstOrDefault(); var rec=new InspectionRecord{SerialNumber=serial,Timestamp=DateTime.Now,ProductCode=recipe.ProductCode,RecipeName=recipe.Name,RecipeVersion=recipe.Version,Passed=pass,NgCode=pass?"":MapNgCode(result),NgReason=pass?"":result.Message,X=m?.X??0,Y=m?.Y??0,Angle=m?.Angle??0,Area=m?.Area??0,ExposureUs=_camera.ExposureUs,Gain=_camera.Gain,Operator=operatorName,ImagePath=annotated,RawImagePath=rawPath,CycleId=cycleId}; rec.Id=_history.Save(rec);
             if(!pass)_alarms.Raise(rec.NgCode,rec.NgReason,"VISION"); Set(MachineState.Completed,pass?"PASS":"NG"); await _plc.ResetCycleAsync(ct); Set(MachineState.Idle,"READY"); return rec;
         }

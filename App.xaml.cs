@@ -1,5 +1,4 @@
 using System.IO;
-using System.Text.Json;
 using System.Windows;
 using FactorialApp.Services;
 
@@ -11,33 +10,98 @@ public partial class App : Application
     {
         base.OnStartup(e);
 
-        AppConfig config = AppConfig.Load();
-        Directory.CreateDirectory(Path.GetDirectoryName(config.DatabasePath) ?? ".");
-        Directory.CreateDirectory(config.ImageArchivePath);
+        try
+        {
+            AppConfig config = AppConfig.Load();
 
-        var db = new DatabaseService(config.DatabasePath);
-        db.Initialize();
+            Directory.CreateDirectory(
+                Path.GetDirectoryName(config.DatabasePath) ?? "."
+            );
 
-        ICameraService camera = config.UseSimulator || !config.Camera.Provider.Equals("Basler", StringComparison.OrdinalIgnoreCase)
-            ? new SimulatedCameraService(config.Camera)
-            : new BaslerCameraService(config.Camera);
+            Directory.CreateDirectory(config.ImageArchivePath);
 
-        IPlcService plc = config.UseSimulator || !config.Plc.Provider.Equals("ModbusTcp", StringComparison.OrdinalIgnoreCase)
-            ? new SimulatedPlcService()
-            : new ModbusTcpPlcService(config.Plc);
+            var db = new DatabaseService(config.DatabasePath);
+            db.Initialize();
 
-        IVisionService vision = new TcpVisionService(config.Vision);
-        var history = new HistoryService(db, config.ImageArchivePath);
-        var alarms = new AlarmService(db);
-        var recipes = new RecipeService(db);
-        var auth = new AuthService(db);
-        var csv = new CsvExportService();
-        var cycle = new InspectionCycleService(config, camera, plc, vision, history, alarms);
-        var watchdog = new WatchdogService(camera, plc, vision, alarms);
+            ICameraService camera =
+                config.UseSimulator ||
+                !config.Camera.Provider.Equals(
+                    "Basler",
+                    StringComparison.OrdinalIgnoreCase)
+                    ? new SimulatedCameraService(config.Camera)
+                    : new BaslerCameraService(config.Camera);
 
-        var vm = new MainViewModel(config, camera, plc, vision, history, alarms, recipes, auth, csv, cycle, watchdog);
-        var window = new MainWindow(vm);
-        MainWindow = window;
-        window.Show();
+            IPlcService plc =
+                config.UseSimulator ||
+                !config.Plc.Provider.Equals(
+                    "ModbusTcp",
+                    StringComparison.OrdinalIgnoreCase)
+                    ? new SimulatedPlcService()
+                    : new ModbusTcpPlcService(config.Plc);
+
+            IVisionService vision =
+                new TcpVisionService(config.Vision);
+
+            var history =
+                new HistoryService(db, config.ImageArchivePath);
+
+            var alarms =
+                new AlarmService(db);
+
+            var recipes =
+                new RecipeService(db);
+
+            var auth =
+                new AuthService(db);
+
+            var csv =
+                new CsvExportService();
+
+            var cycle =
+                new InspectionCycleService(
+                    config,
+                    camera,
+                    plc,
+                    vision,
+                    history,
+                    alarms);
+
+            var watchdog =
+                new WatchdogService(
+                    camera,
+                    plc,
+                    vision,
+                    alarms);
+
+            var vm =
+                new MainViewModel(
+                    config,
+                    camera,
+                    plc,
+                    vision,
+                    history,
+                    alarms,
+                    recipes,
+                    auth,
+                    csv,
+                    cycle,
+                    watchdog);
+
+            var window = new MainWindow(vm);
+
+            MainWindow = window;
+
+            window.Show();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                ex.ToString(),
+                "HMI STARTUP ERROR",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+
+            Shutdown();
+        }
     }
 }
